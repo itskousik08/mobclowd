@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MobCloud AI Builder</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- Monaco Editor CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.34.1/min/vs/loader.min.js"></script>
+    <!-- Zip Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+</head>
+<body>
+
+    <div class="sidebar">
+        <h2>MobCloud ☁️</h2>
+        <div class="control-group">
+            <textarea id="promptInput" placeholder="Describe your website (e.g., 'A portfolio for a photographer with a dark theme')..."></textarea>
+            <button id="generateBtn">✨ Generate Website</button>
+        </div>
+
+        <div class="control-group">
+            <button class="secondary-btn" id="downloadBtn">💾 Download ZIP</button>
+            <button class="secondary-btn" onclick="document.getElementById('ghModal').style.display='block'">🐙 Publish to GitHub</button>
+        </div>
+
+        <div class="editor-container">
+            <div class="tab-bar">
+                <button class="tab active" onclick="switchTab('html')">HTML</button>
+                <button class="tab" onclick="switchTab('css')">CSS</button>
+                <button class="tab" onclick="switchTab('js')">JS</button>
+            </div>
+            <div id="monaco-editor"></div>
+            <button id="applyBtn">▶ Run Code</button>
+        </div>
+    </div>
+
+    <div class="preview-area">
+        <iframe id="previewFrame"></iframe>
+    </div>
+
+    <!-- GitHub Modal -->
+    <div id="ghModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="document.getElementById('ghModal').style.display='none'">&times;</span>
+            <h3>Publish to GitHub</h3>
+            <input type="text" id="ghToken" placeholder="GitHub Personal Access Token (PAT)">
+            <input type="text" id="ghRepo" placeholder="Repository Name (e.g. my-site)">
+            <button id="ghPublishBtn">Push Code</button>
+            <p id="ghStatus"></p>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
