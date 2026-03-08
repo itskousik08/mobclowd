@@ -25,7 +25,7 @@ Follow these steps to get Mobclowd up and running on your local machine.
 **1. Clone the repository:**
 
 ```bash
-git clone https://github.com/your-username/Mobclowd.git
+git clone https://github.com/itskousik08/Mobclowd.git
 cd Mobclowd
 ```
 
