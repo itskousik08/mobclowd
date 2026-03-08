@@ -36,7 +36,7 @@ Build websites and web applications using local AI models powered by [Ollama](ht
 
 ```bash
 # 1. Clone the repository
-git clone https://github.com/yourusername/mobclowd.git
+git clone https://github.com/itskousik08/mobclowd.git
 cd mobclowd
 
 # 2. Install all dependencies
