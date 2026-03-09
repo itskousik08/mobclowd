@@ -1,7 +1,7 @@
 {
-  "name": "mobclowd",
-  "version": "1.0.0",
-  "description": "Professional AI Development Platform powered by local Ollama models",
+  "name": "mobcloud",
+  "version": "4.0.0",
+  "description": "MobCloud AI v4 — Local Autonomous Development Platform",
   "private": true,
   "workspaces": [
     "backend",
