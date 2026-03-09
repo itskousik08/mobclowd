@@ -1,330 +1,186 @@
-# Mobclowd 🚀
+# MobCloud Pro — Autonomous AI Agent Platform
 
-**Professional Local AI Development Platform**
+> Full project lifecycle management: files, git, email, search, preview — all local, all private.
 
-Build websites and web applications using local AI models powered by [Ollama](https://ollama.ai). Fully private, no cloud required.
-
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![Node.js](https://img.shields.io/badge/Node.js-18+-green.svg)](https://nodejs.org)
-[![Ollama](https://img.shields.io/badge/Ollama-Compatible-purple.svg)](https://ollama.ai)
-
----
-
-## ✨ Features
-
-- **🤖 AI-Powered Development** — Chat with local AI models to build and modify websites
-- **⚡ Live Code Generation** — Watch AI write code in real-time in the editor
-- **🌐 Live Preview** — Instant preview with desktop, tablet, and mobile views
-- **📁 File Explorer** — Full project management with create, rename, delete
-- **💬 AI Chat Interface** — ChatGPT-style interface with streaming responses
-- **🎨 Professional UI** — Dark-mode IDE inspired by Cursor and VS Code
-- **📦 Project Templates** — Landing page, portfolio, dashboard, blog starters
-- **💾 Export Projects** — Download as ZIP at any time
-- **🔄 Undo/Redo** — Automatic snapshots before AI changes
-- **🧠 AI Thinking Panel** — See what the AI is doing step by step
-
----
-
-## 🎬 Quick Start
-
-### Prerequisites
-
-- [Node.js 18+](https://nodejs.org)
-- [Ollama](https://ollama.ai) installed and running
-
-### Installation
+## Quick Start
 
 ```bash
-# 1. Clone the repository
-git clone https://github.com/itskousik08/mobclowd.git
-cd mobclowd
+# 1. Clone and enter
+git clone <your-repo-url>
+cd mobclowd-pro
 
-# 2. Install all dependencies
-npm run install:all
+# 2. Start with Docker (recommended)
+docker compose up --build
 
-# 3. Set up environment
-cp backend/.env.example backend/.env
+# 3. Pull an AI model (in a new terminal)
+ollama pull llama3        # General purpose
+ollama pull qwen2.5       # Best for tool-calling
+ollama pull llama3.2      # Fast, good for tools
 
-# 4. Start Ollama (in a separate terminal)
+# 4. Open the app
+open http://localhost:5173
+
+# 5. Test the agent
+# In the chat: "Create test.txt with hello world"
+```
+
+## Manual Setup (No Docker)
+
+### Backend (Python 3.11+)
+```bash
+cd agent
+python -m venv .venv
+source .venv/bin/activate    # Windows: .venv\Scripts\activate
+pip install -r requirements.txt
+cp .env.example .env         # Edit as needed
+uvicorn main:app --reload --port 8000
+```
+
+### Frontend (Node 18+)
+```bash
+cd frontend
+npm install
+npm run dev                  # Starts on port 5173
+```
+
+### Ollama
+```bash
+# macOS/Linux
+curl https://ollama.ai/install.sh | sh
 ollama serve
-
-# 5. Pull an AI model
-ollama pull glm-5:cloud
-ollama pull kimi-k2.5:cloud
-
-# 6. Start Mobclowd
-npm run dev
+ollama pull llama3
 ```
 
-### Open in browser
+## Architecture
 
 ```
-http://localhost:5173
+mobclowd-pro/
+├── agent/                    # Python FastAPI backend
+│   ├── main.py               # FastAPI app, all REST + WS endpoints
+│   ├── services/
+│   │   ├── agent_runner.py   # ReAct loop over Ollama
+│   │   ├── memory.py         # ChromaDB / SQLite RAG memory
+│   │   └── audit.py          # Audit logger, vault, auth
+│   ├── tools/
+│   │   ├── file_tools.py     # Read/write/delete/organize with backup+diff
+│   │   ├── git_tools.py      # GitPython integration
+│   │   ├── email_tools.py    # IMAP/SMTP
+│   │   ├── search_tools.py   # Glob + semantic search
+│   │   ├── calendar_tools.py # ICS file ops
+│   │   └── web_tools.py      # URL fetch → markdown
+│   └── requirements.txt
+├── frontend/                 # React + Vite + Tailwind
+│   └── src/
+│       ├── components/
+│       │   ├── chat/ChatAgent.jsx    # ReAct visualizer + voice
+│       │   └── modals/ConfirmModal.jsx
+│       ├── hooks/
+│       │   ├── useAgentWS.js         # WebSocket to Python agent
+│       │   └── useKeyboardShortcuts.js
+│       ├── pages/
+│       │   ├── SettingsPage.jsx      # Vault + model picker
+│       │   └── LogsPage.jsx          # Audit log viewer
+│       └── store/useProStore.js      # Zustand global state
+├── tests/
+│   └── backend/test_agent.py         # 20+ pytest tests
+├── docker-compose.yml
+└── README.md
 ```
 
----
+## AI Capabilities
 
-## 🤖 Supported AI Models
+### File & Folder Operations
+```
+"Create src/components, src/hooks, src/lib folders"
+"Read utils.js and summarize what it does"
+"Edit index.html line 10 to add <div class='pro-theme'>"
+"Delete all .log files in the logs/ folder"
+"Organize root folder files by type into subfolders"
+"Find all files that contain 'fetchUser'"
+```
 
-Mobclowd works with any model available in Ollama:
+### Git
+```
+"Check git status"
+"Commit all changes with message 'UI improvements'"
+"Create branch 'feature/auth' and switch to it"
+"Show last 10 commits"
+"Push to origin main"
+```
+
+### Email (after configuring credentials in Settings → Vault)
+```
+"List my last 10 emails"
+"Read email UID 123"
+"Send email to alice@example.com with subject 'Update'"
+"Search emails for 'invoice'"
+```
+
+### Database
+```
+"Create supabase.sql with a users and posts schema"
+"Add src/lib/supabase.js with Supabase client setup"
+"Set up Firebase config with auth and firestore"
+```
+
+### Web & Docs
+```
+"Fetch https://docs.tailwindcss.com and save as docs/tailwind.md"
+"Read the React hooks documentation and create a summary"
+```
+
+### Calendar
+```
+"Create event 'Deploy v2' on 2024-12-01 at 10:00"
+"List all upcoming events"
+"Delete event with UID abc-123"
+```
+
+## Testing
+
+```bash
+# Backend tests
+cd agent
+pip install pytest pytest-asyncio
+pytest ../tests/backend/test_agent.py -v
+
+# Run specific test
+pytest ../tests/backend/test_agent.py::test_full_file_workflow -v
+```
+
+## Security
+
+- **Vault**: All secrets (GitHub token, email creds) encrypted with AES-256 via `cryptography` library
+- **Sandbox**: All file ops restricted to project directory (path traversal blocked)
+- **Confirm modals**: Every write/delete shown to user with diff before executing
+- **Audit log**: Every action logged to SQLite with timestamp, actor, details
+- **JWT auth**: Local username/password with 24h token expiry
+- **Backups**: Automatic backup before every write/delete
+
+### Default Login
+- Username: `admin`
+- Password: `mobcloud123`
+- Change in: Settings → Auth
+
+## Environment Variables
+
+```bash
+# agent/.env
+MOBCLOUD_VAULT_KEY=your-32-char-secret-key
+MOBCLOUD_JWT_SECRET=your-jwt-secret
+OLLAMA_HOST=http://localhost:11434
+```
+
+## Recommended Models
 
 | Model | Size | Best For |
 |-------|------|----------|
-| `llama3` | 4.7GB | General web development |
-| `codellama` | 3.8GB | Code generation |
-| `mistral` | 4.1GB | Fast generation |
-| `deepseek-coder` | 776MB | Code-focused tasks |
-| `glm4` | 5.5GB | Advanced reasoning |
-| `phi3` | 2.3GB | Lightweight option |
-
-```bash
-# Install recommended model
-ollama pull llama3
-
-# Or for code-heavy work
-ollama pull codellama
-
-# Lightweight alternative
-ollama pull phi3
-```
-
----
-
-## 🖥 User Guide
-
-### Creating a Project
-
-1. Click **New Project** on the home page
-2. Enter a project name
-3. Choose a template (or start blank)
-4. The AI workspace opens automatically
-
-### Using the AI
-
-Type prompts in the AI chat panel on the right:
-
-```
-Create a modern hero section with a gradient background
-```
-
-```
-Add a navigation bar with logo and links
-```
-
-```
-Make the design responsive for mobile devices
-```
-
-```
-Add smooth scroll animations to all sections
-```
-
-```
-Create a contact form with validation
-```
-
-### Working with Code
-
-- Click any file in the **File Explorer** to open it
-- Edit code directly in the **Code Editor**
-- Press `Ctrl+S` / `Cmd+S` to save
-- The **Preview** updates automatically
-
-### Preview Modes
-
-- 🖥 **Desktop** — Full width view
-- 📱 **Tablet** — 768px width
-- 📲 **Mobile** — 375px width
-
-### Exporting Your Project
-
-Click **Export** in the top bar to download your project as a ZIP file.
-
----
-
-## 🏗 Project Structure
-
-```
-mobclowd/
-├── backend/                 # Express.js API server
-│   ├── routes/
-│   │   ├── ai.js           # AI streaming endpoints
-│   │   ├── projects.js     # Project management
-│   │   ├── files.js        # File operations
-│   │   ├── ollama.js       # Ollama model API
-│   │   └── templates.js    # Project templates
-│   ├── services/
-│   │   ├── agent.js        # AI coding agent
-│   │   ├── ollama.js       # Ollama streaming client
-│   │   ├── projects.js     # Project service
-│   │   └── templates.js    # Template definitions
-│   ├── workspace/          # User projects (auto-created)
-│   └── server.js           # Main server entry
-│
-├── frontend/               # React frontend
-│   ├── src/
-│   │   ├── components/
-│   │   │   ├── Chat/       # AI chat interface
-│   │   │   ├── Editor/     # CodeMirror editor
-│   │   │   ├── FileExplorer/
-│   │   │   ├── Preview/    # Live website preview
-│   │   │   ├── Workspace/  # Header, Activity bar
-│   │   │   ├── AI/         # Thinking panel
-│   │   │   ├── Modals/     # New project modal
-│   │   │   └── UI/         # Shared components
-│   │   ├── pages/
-│   │   │   ├── HomePage.jsx
-│   │   │   └── WorkspacePage.jsx
-│   │   ├── store/          # Zustand state management
-│   │   ├── hooks/          # Custom React hooks
-│   │   ├── utils/          # API client, helpers
-│   │   └── styles/         # Global CSS
-│   └── package.json
-│
-├── scripts/
-│   └── setup.js            # Installation helper
-├── docs/                   # Additional documentation
-└── package.json            # Root workspace config
-```
-
----
-
-## ⚙ Configuration
-
-### Backend Environment (`.env`)
-
-```env
-PORT=3001
-OLLAMA_URL=http://localhost:11434
-NODE_ENV=development
-```
-
-### Custom Ollama URL
-
-If Ollama runs on a different host:
-
-```env
-OLLAMA_URL=http://192.168.1.100:11434
-```
-
----
-
-## 🔧 Development
-
-```bash
-# Start backend only
-cd backend && npm run dev
-
-# Start frontend only
-cd frontend && npm run dev
-
-# Build frontend for production
-cd frontend && npm run build
-```
-
----
-
-## 🎨 Example Prompts
-
-### Landing Pages
-
-```
-Create a SaaS landing page for a project management tool with dark theme
-```
-
-```
-Build a hero section with animated gradient background and CTA buttons
-```
-
-### Portfolios
-
-```
-Create a developer portfolio with project cards and GitHub-style design
-```
-
-### UI Components
-
-```
-Add a sticky navigation bar with blur effect and mobile hamburger menu
-```
-
-```
-Create a pricing table with 3 tiers, highlighted middle card
-```
-
-### Improvements
-
-```
-Make this page look more professional and modern
-```
-
-```
-Add CSS animations to the hero section
-```
-
-```
-Improve the mobile layout and fix spacing issues
-```
-
----
-
-## 🐛 Troubleshooting
-
-### Ollama Not Connected
-
-```bash
-# Check if Ollama is running
-curl http://localhost:11434/api/tags
-
-# Start Ollama
-ollama serve
-
-# Check installed models
-ollama list
-```
-
-### Port Already in Use
-
-```bash
-# Kill process on port 3001
-kill $(lsof -ti:3001)
-
-# Or change port in .env
-echo "PORT=3002" >> backend/.env
-```
-
-### No Models Showing
-
-```bash
-# Pull a model first
-ollama pull llama3
-
-# Or a smaller model
-ollama pull phi3:mini
-```
-
-### AI Not Generating Code
-
-- Make sure a model is selected in the model picker
-- Check Ollama status indicator (top right)
-- Verify model is fully downloaded: `ollama list`
-
----
-
-## 📄 License
-
-MIT License — free to use, modify, and distribute.
-
----
-
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create a feature branch: `git checkout -b feature/amazing-feature`
-3. Commit changes: `git commit -m 'Add amazing feature'`
-4. Push: `git push origin feature/amazing-feature`
-5. Open a Pull Request
-
----
-
-**Made with ❤️ using Ollama**
+| `qwen2.5` | 7B | Tool calling, code gen |
+| `llama3` | 8B | General tasks |
+| `llama3.2` | 3B | Fast, tool calling |
+| `mistral-nemo` | 12B | Complex reasoning |
+| `qwen2.5:72b` | 72B | Maximum capability |
+
+## License
+
+MIT — Free for local, private use.

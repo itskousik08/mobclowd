@@ -1,19 +1,106 @@
-version: '3.8'
+version: "3.9"
+
+# MobCloud Pro — Full Stack Docker Compose
+# Services: frontend (Vite), backend (FastAPI), ollama (LLM)
+# Run: docker compose up --build
+# Visit: http://localhost:5173
 
 services:
-  mobclowd:
-    build: .
+  # ── Python FastAPI Agent ─────────────────────────
+  agent:
+    build:
+      context: ./agent
+      dockerfile: Dockerfile
+    container_name: mobcloud-agent
     ports:
-      - "3001:3001"
-    environment:
-      - NODE_ENV=production
-      - PORT=3001
-      - OLLAMA_URL=http://host.docker.internal:11434
+      - "8000:8000"
     volumes:
-      - mobclowd-workspace:/app/backend/workspace
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
+      - ./workspace:/app/workspace
+      - agent-data:/app/data
+    environment:
+      - MOBCLOUD_VAULT_KEY=${MOBCLOUD_VAULT_KEY:-change-me-in-production}
+      - MOBCLOUD_JWT_SECRET=${MOBCLOUD_JWT_SECRET:-change-me-jwt-secret}
+      - OLLAMA_HOST=http://ollama:11434
+    depends_on:
+      ollama:
+        condition: service_healthy
     restart: unless-stopped
+    networks:
+      - mobcloud-net
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+  # ── React Frontend ────────────────────────────────
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: mobcloud-frontend
+    ports:
+      - "5173:5173"
+    environment:
+      - VITE_AGENT_URL=http://localhost:8000
+      - VITE_WS_URL=ws://localhost:8000
+    depends_on:
+      - agent
+    restart: unless-stopped
+    networks:
+      - mobcloud-net
+
+  # ── Ollama LLM ────────────────────────────────────
+  ollama:
+    image: ollama/ollama:latest
+    container_name: mobcloud-ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama-models:/root/.ollama
+    restart: unless-stopped
+    networks:
+      - mobcloud-net
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:11434/api/tags"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+    # Uncomment for GPU (NVIDIA):
+    # deploy:
+    #   resources:
+    #     reservations:
+    #       devices:
+    #         - driver: nvidia
+    #           count: 1
+    #           capabilities: [gpu]
+
+  # ── Ollama Model Puller (one-shot) ────────────────
+  model-puller:
+    image: curlimages/curl:latest
+    container_name: mobcloud-model-puller
+    depends_on:
+      ollama:
+        condition: service_healthy
+    command: >
+      sh -c "
+        echo 'Pulling llama3...' &&
+        curl -s -X POST http://ollama:11434/api/pull -d '{\"name\":\"llama3\"}' &&
+        echo 'Model ready.'
+      "
+    restart: "no"
+    networks:
+      - mobcloud-net
 
 volumes:
-  mobclowd-workspace:
+  ollama-models:
+    name: mobcloud-ollama-models
+  agent-data:
+    name: mobcloud-agent-data
+
+networks:
+  mobcloud-net:
+    name: mobcloud-network
+    driver: bridge
