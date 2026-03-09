@@ -1,329 +1,202 @@
-# Mobclowd 🚀
+# 🚀 MobCloud AI v4
 
-**Professional Local AI Development Platform**
+**Local Autonomous Development Platform** — Build, debug, deploy, and manage your entire software lifecycle with AI, all privately on your device.
 
-Build websites and web applications using local AI models powered by [Ollama](https://ollama.ai). Fully private, no cloud required.
-
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![Node.js](https://img.shields.io/badge/Node.js-18+-green.svg)](https://nodejs.org)
-[![Ollama](https://img.shields.io/badge/Ollama-Compatible-purple.svg)](https://ollama.ai)
+[![Local First](https://img.shields.io/badge/Local%20First-100%25%20Private-6366f1?style=flat-square)](https://github.com)
+[![Ollama](https://img.shields.io/badge/Powered%20by-Ollama-8b5cf6?style=flat-square)](https://ollama.ai)
+[![Version](https://img.shields.io/badge/Version-4.0.0-22d3ee?style=flat-square)](https://github.com)
 
 ---
 
-## ✨ Features
+## ✨ What's New in v4
 
-- **🤖 AI-Powered Development** — Chat with local AI models to build and modify websites
-- **⚡ Live Code Generation** — Watch AI write code in real-time in the editor
-- **🌐 Live Preview** — Instant preview with desktop, tablet, and mobile views
-- **📁 File Explorer** — Full project management with create, rename, delete
-- **💬 AI Chat Interface** — ChatGPT-style interface with streaming responses
-- **🎨 Professional UI** — Dark-mode IDE inspired by Cursor and VS Code
-- **📦 Project Templates** — Landing page, portfolio, dashboard, blog starters
-- **💾 Export Projects** — Download as ZIP at any time
-- **🔄 Undo/Redo** — Automatic snapshots before AI changes
-- **🧠 AI Thinking Panel** — See what the AI is doing step by step
+MobCloud v4 is a complete upgrade from v3, transforming the platform into a full autonomous development environment:
+
+| Feature | v3 | v4 |
+|---------|----|----|
+| AI Chat | ✅ | ✅ Enhanced with agent commands |
+| Live Code Gen | ✅ | ✅ Multi-file, better streaming |
+| Instant Preview | ✅ | ✅ Desktop + Mobile |
+| File Explorer | ✅ | ✅ With drag & drop |
+| **Git Manager** | ❌ | ✅ Full git workflow UI |
+| **Database Manager** | ❌ | ✅ SQLite schema + query builder |
+| **Security Scanner** | ❌ | ✅ Auto vulnerability detection |
+| **CI/CD Pipeline** | ❌ | ✅ Local pipeline simulator |
+| **API Tester** | ❌ | ✅ Postman-style tool |
+| **AI Agent System** | ❌ | ✅ 8 specialized agents |
+| **Analytics Dashboard** | ❌ | ✅ Dev metrics + charts |
+| **Personality Modes** | ❌ | ✅ Professional / Lovable / Expert |
+| **Settings Panel** | ❌ | ✅ User preferences |
+| **Keyboard Shortcuts** | ❌ | ✅ Cmd+K for chat |
+| **Notification System** | ❌ | ✅ In-app notifications |
 
 ---
 
-## 🎬 Quick Start
+## 🏃 Quick Start
 
 ### Prerequisites
 
-- [Node.js 18+](https://nodejs.org)
+- [Node.js](https://nodejs.org) 18+
 - [Ollama](https://ollama.ai) installed and running
 
-### Installation
+### 1. Install Ollama & Pull a Model
 
 ```bash
-# 1. Clone the repository
-git clone https://github.com/yourusername/mobclowd.git
-cd mobclowd
+# Install Ollama from https://ollama.ai
+ollama pull llama3          # Recommended (8B)
+# or
+ollama pull codellama       # Better for code
+ollama pull mistral         # Fast and capable
+```
 
-# 2. Install all dependencies
+### 2. Setup MobCloud
+
+```bash
+# Install all dependencies
 npm run install:all
 
-# 3. Set up environment
-cp backend/.env.example backend/.env
-
-# 4. Start Ollama (in a separate terminal)
-ollama serve
-
-# 5. Pull an AI model
-ollama pull llama3
-
-# 6. Start Mobclowd
+# Start development servers
 npm run dev
 ```
 
-### Open in browser
+Open **http://localhost:5173** in your browser.
+
+---
+
+## 🧠 AI Agents
+
+MobCloud v4 includes 8 specialized AI agents accessible from the tools sidebar:
+
+| Agent | Purpose |
+|-------|---------|
+| **CodeAgent** | Generates, refactors, and edits code |
+| **GitAgent** | Auto-commits, branch management, PR descriptions |
+| **DebugAgent** | Finds and fixes bugs automatically |
+| **DeployAgent** | Dockerfiles, CI/CD, deployment configs |
+| **DocsAgent** | README, JSDoc, API documentation |
+| **DatabaseAgent** | Schema design, migrations, queries |
+| **SecurityAgent** | Vulnerability fixes, input validation |
+| **EmailAgent** | Email templates, SMTP configuration |
+
+### Example Commands
 
 ```
-http://localhost:5173
+Create React dashboard with authentication
+Fix all TypeScript errors in src/
+Add Docker support for this project
+Generate comprehensive README with API docs
+Create SQLite schema for a blog app
+Scan and fix all security vulnerabilities
 ```
 
 ---
 
-## 🤖 Supported AI Models
+## 🛠️ Tools Sidebar (New in v4)
 
-Mobclowd works with any model available in Ollama:
+Click the icons on the right sidebar in the workspace:
 
-| Model | Size | Best For |
-|-------|------|----------|
-| `llama3` | 4.7GB | General web development |
-| `codellama` | 3.8GB | Code generation |
-| `mistral` | 4.1GB | Fast generation |
-| `deepseek-coder` | 776MB | Code-focused tasks |
-| `glm4` | 5.5GB | Advanced reasoning |
-| `phi3` | 2.3GB | Lightweight option |
-
-```bash
-# Install recommended model
-ollama pull llama3
-
-# Or for code-heavy work
-ollama pull codellama
-
-# Lightweight alternative
-ollama pull phi3
-```
+- **Git** — Initialize repos, view changes, commit, view history
+- **DB** — SQLite schema viewer, query builder, table management
+- **Sec** — Security scanner with severity scoring
+- **CI** — CI/CD pipeline simulator with step logs
+- **API** — Postman-style API testing tool
+- **AI** — Multi-agent orchestration panel
+- **Stats** — Analytics dashboard with charts
 
 ---
 
-## 🖥 User Guide
+## ⌨️ Keyboard Shortcuts
 
-### Creating a Project
-
-1. Click **New Project** on the home page
-2. Enter a project name
-3. Choose a template (or start blank)
-4. The AI workspace opens automatically
-
-### Using the AI
-
-Type prompts in the AI chat panel on the right:
-
-```
-Create a modern hero section with a gradient background
-```
-
-```
-Add a navigation bar with logo and links
-```
-
-```
-Make the design responsive for mobile devices
-```
-
-```
-Add smooth scroll animations to all sections
-```
-
-```
-Create a contact form with validation
-```
-
-### Working with Code
-
-- Click any file in the **File Explorer** to open it
-- Edit code directly in the **Code Editor**
-- Press `Ctrl+S` / `Cmd+S` to save
-- The **Preview** updates automatically
-
-### Preview Modes
-
-- 🖥 **Desktop** — Full width view
-- 📱 **Tablet** — 768px width
-- 📲 **Mobile** — 375px width
-
-### Exporting Your Project
-
-Click **Export** in the top bar to download your project as a ZIP file.
+| Shortcut | Action |
+|----------|--------|
+| `Cmd/Ctrl + K` | Focus AI chat input |
+| `Ctrl + Enter` | Send chat message |
+| `Ctrl + S` | Save active file |
 
 ---
 
-## 🏗 Project Structure
+## 🎭 Personality Modes
+
+Configure your preferred AI interaction style in **Settings** (gear icon):
+
+- **Professional** — Clear, efficient, neutral
+- **Lovable** — Friendly mentor, encouraging, celebratory
+  > *"Good morning Kousik from Guwahati! Ready to build something amazing today? 🚀"*
+- **Expert** — Deep technical, precise terminology
+
+---
+
+## 🔒 Privacy & Security
+
+- **100% Local** — All data stays on your machine
+- **No telemetry** — Zero external data collection
+- **Encrypted** — API keys stored locally
+- **Sandboxed** — Code execution in isolated environments
+- **Offline First** — Works without internet
+
+---
+
+## 📁 Project Structure
 
 ```
-mobclowd/
-├── backend/                 # Express.js API server
+mobcloud-v4/
+├── backend/                 # Node.js + Express API
 │   ├── routes/
-│   │   ├── ai.js           # AI streaming endpoints
-│   │   ├── projects.js     # Project management
-│   │   ├── files.js        # File operations
-│   │   ├── ollama.js       # Ollama model API
-│   │   └── templates.js    # Project templates
+│   │   ├── ai.js           # AI streaming endpoint
+│   │   ├── git.js          # Git operations (NEW)
+│   │   ├── database.js     # SQLite management (NEW)
+│   │   ├── security.js     # Security scanning (NEW)
+│   │   ├── cicd.js         # Pipeline simulation (NEW)
+│   │   ├── analytics.js    # Metrics tracking (NEW)
+│   │   ├── files.js        # File management
+│   │   ├── projects.js     # Project CRUD
+│   │   └── ollama.js       # Ollama proxy
 │   ├── services/
-│   │   ├── agent.js        # AI coding agent
-│   │   ├── ollama.js       # Ollama streaming client
-│   │   ├── projects.js     # Project service
-│   │   └── templates.js    # Template definitions
-│   ├── workspace/          # User projects (auto-created)
-│   └── server.js           # Main server entry
+│   │   ├── agent.js        # AI agent with file writing
+│   │   ├── ollama.js       # Streaming chat
+│   │   └── projects.js     # Project service
+│   └── server.js           # Express + Socket.IO
 │
-├── frontend/               # React frontend
-│   ├── src/
-│   │   ├── components/
-│   │   │   ├── Chat/       # AI chat interface
-│   │   │   ├── Editor/     # CodeMirror editor
-│   │   │   ├── FileExplorer/
-│   │   │   ├── Preview/    # Live website preview
-│   │   │   ├── Workspace/  # Header, Activity bar
-│   │   │   ├── AI/         # Thinking panel
-│   │   │   ├── Modals/     # New project modal
-│   │   │   └── UI/         # Shared components
-│   │   ├── pages/
-│   │   │   ├── HomePage.jsx
-│   │   │   └── WorkspacePage.jsx
-│   │   ├── store/          # Zustand state management
-│   │   ├── hooks/          # Custom React hooks
-│   │   ├── utils/          # API client, helpers
-│   │   └── styles/         # Global CSS
-│   └── package.json
-│
-├── scripts/
-│   └── setup.js            # Installation helper
-├── docs/                   # Additional documentation
-└── package.json            # Root workspace config
+└── frontend/                # React + Vite
+    └── src/
+        ├── components/
+        │   ├── Workspace/
+        │   │   ├── WorkspaceHeader.jsx
+        │   │   └── ToolsSidebar.jsx   # NEW - tool hub
+        │   ├── Chat/ChatPanel.jsx     # AI chat
+        │   ├── Editor/EditorPanel.jsx # CodeMirror editor
+        │   ├── Preview/PreviewPanel.jsx
+        │   ├── FileExplorer/
+        │   ├── Git/GitPanel.jsx       # NEW
+        │   ├── Database/DatabasePanel.jsx # NEW
+        │   ├── Security/SecurityPanel.jsx # NEW
+        │   ├── CI/CICDPanel.jsx       # NEW
+        │   ├── API/APITestPanel.jsx   # NEW
+        │   ├── Agents/AgentsPanel.jsx # NEW
+        │   ├── Analytics/AnalyticsPanel.jsx # NEW
+        │   └── Modals/
+        │       ├── SettingsModal.jsx  # NEW
+        │       └── NewProjectModal.jsx
+        ├── store/useAppStore.js       # Zustand state
+        └── utils/api.js               # API client
 ```
 
 ---
 
-## ⚙ Configuration
+## 🚧 Roadmap
 
-### Backend Environment (`.env`)
-
-```env
-PORT=3001
-OLLAMA_URL=http://localhost:11434
-NODE_ENV=development
-```
-
-### Custom Ollama URL
-
-If Ollama runs on a different host:
-
-```env
-OLLAMA_URL=http://192.168.1.100:11434
-```
-
----
-
-## 🔧 Development
-
-```bash
-# Start backend only
-cd backend && npm run dev
-
-# Start frontend only
-cd frontend && npm run dev
-
-# Build frontend for production
-cd frontend && npm run build
-```
-
----
-
-## 🎨 Example Prompts
-
-### Landing Pages
-
-```
-Create a SaaS landing page for a project management tool with dark theme
-```
-
-```
-Build a hero section with animated gradient background and CTA buttons
-```
-
-### Portfolios
-
-```
-Create a developer portfolio with project cards and GitHub-style design
-```
-
-### UI Components
-
-```
-Add a sticky navigation bar with blur effect and mobile hamburger menu
-```
-
-```
-Create a pricing table with 3 tiers, highlighted middle card
-```
-
-### Improvements
-
-```
-Make this page look more professional and modern
-```
-
-```
-Add CSS animations to the hero section
-```
-
-```
-Improve the mobile layout and fix spacing issues
-```
-
----
-
-## 🐛 Troubleshooting
-
-### Ollama Not Connected
-
-```bash
-# Check if Ollama is running
-curl http://localhost:11434/api/tags
-
-# Start Ollama
-ollama serve
-
-# Check installed models
-ollama list
-```
-
-### Port Already in Use
-
-```bash
-# Kill process on port 3001
-kill $(lsof -ti:3001)
-
-# Or change port in .env
-echo "PORT=3002" >> backend/.env
-```
-
-### No Models Showing
-
-```bash
-# Pull a model first
-ollama pull llama3
-
-# Or a smaller model
-ollama pull phi3:mini
-```
-
-### AI Not Generating Code
-
-- Make sure a model is selected in the model picker
-- Check Ollama status indicator (top right)
-- Verify model is fully downloaded: `ollama list`
+- [ ] Email Management (IMAP/SMTP)
+- [ ] Performance Profiler (flame graphs)
+- [ ] SEO Analyzer
+- [ ] Workflow Builder (visual drag-drop)
+- [ ] Plugin Marketplace
+- [ ] Multi-language UI (react-i18next)
+- [ ] Backup System with timeline
+- [ ] Offline Knowledge Base (RAG + PDF indexing)
+- [ ] Accessibility Scanner (WCAG)
 
 ---
 
 ## 📄 License
 
-MIT License — free to use, modify, and distribute.
-
----
-
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create a feature branch: `git checkout -b feature/amazing-feature`
-3. Commit changes: `git commit -m 'Add amazing feature'`
-4. Push: `git push origin feature/amazing-feature`
-5. Open a Pull Request
-
----
-
-**Made with ❤️ using Ollama**
+MIT — Built with ❤️ for developers who value privacy
