@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Download, Sun, Moon, Eye, EyeOff, Zap, Cpu,
+import { ArrowLeft, Download, Sun, Moon, Eye, EyeOff, Zap, Cpu, Settings, Bell,
   Wifi, WifiOff, ChevronDown, Wrench, RefreshCw, Package } from 'lucide-react';
 import { useAppStore } from '../../store/useAppStore';
 import { api, streamAI } from '../../utils/api';
@@ -167,6 +167,16 @@ export default function WorkspaceHeader({ projectId, onRefreshTree }) {
 
       {/* Status */}
       <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: statusColor, boxShadow: `0 0 6px ${statusColor}` }} />
+      {/* Notifications */}
+      <div className="relative flex-shrink-0">
+        <button className="btn-icon" title="Notifications">
+          <Bell size={14} />
+        </button>
+        {(notifications?.filter(n => !n.read).length > 0) && (
+          <div className="notif-badge" />
+        )}
+      </div>
+
 
       {/* Theme */}
       <button onClick={toggleTheme} className="btn-icon flex-shrink-0">

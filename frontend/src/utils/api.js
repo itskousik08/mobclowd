@@ -1,72 +1,99 @@
-const BASE = '/api';
+const BASE = '';
 
-async function req(path, opts = {}) {
-  const res = await fetch(`${BASE}${path}`, {
+async function request(path, opts = {}) {
+  const res = await fetch(path, {
     headers: { 'Content-Type': 'application/json', ...opts.headers },
-    ...opts
+    ...opts,
   });
   if (!res.ok) {
     const err = await res.json().catch(() => ({ error: res.statusText }));
-    throw new Error(err.error || 'Request failed');
+    throw new Error(err.error || res.statusText);
   }
   return res.json();
 }
 
 export const api = {
-  getModels: () => req('/ollama/models'),
-  getOllamaStatus: () => req('/ollama/status'),
-  getProjects: () => req('/projects'),
-  getProject: (id) => req(`/projects/${id}`),
-  createProject: (data) => req('/projects', { method: 'POST', body: JSON.stringify(data) }),
-  updateProject: (id, data) => req(`/projects/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
-  deleteProject: (id) => req(`/projects/${id}`, { method: 'DELETE' }),
-  getFileTree: (id) => req(`/projects/${id}/tree`),
-  downloadProject: (id) => `${BASE}/projects/${id}/download`,
-  getSnapshots: (id) => req(`/projects/${id}/snapshots`),
-  readFile: (pid, path) => req(`/files/${pid}/${path}`),
-  writeFile: (pid, path, content) => req(`/files/${pid}/${path}`, { method: 'POST', body: JSON.stringify({ content }) }),
-  deleteFile: (pid, path) => req(`/files/${pid}/${path}`, { method: 'DELETE' }),
-  renameFile: (pid, from, to) => req(`/files/${pid}/rename`, { method: 'PUT', body: JSON.stringify({ from, to }) }),
-  mkdir: (pid, dirPath) => req(`/files/${pid}/mkdir`, { method: 'POST', body: JSON.stringify({ dirPath }) }),
-  getTemplates: () => req('/templates'),
+  request,
+
+  // Ollama
+  getOllamaStatus: () => request('/api/ollama/status'),
+  getModels: () => request('/api/ollama/models'),
+
+  // Projects
+  getProjects: () => request('/api/projects'),
+  getProject: (id) => request(`/api/projects/${id}`),
+  createProject: (data) => request('/api/projects', { method: 'POST', body: JSON.stringify(data) }),
+  deleteProject: (id) => request(`/api/projects/${id}`, { method: 'DELETE' }),
+  updateProject: (id, data) => request(`/api/projects/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
+
+  // Files
+  readFile: (projectId, filePath) => request(`/api/files/${projectId}/read?path=${encodeURIComponent(filePath)}`),
+  writeFile: (projectId, filePath, content) => request(`/api/files/${projectId}/write`, {
+    method: 'POST', body: JSON.stringify({ path: filePath, content })
+  }),
+  deleteFile: (projectId, filePath) => request(`/api/files/${projectId}/delete`, {
+    method: 'DELETE', body: JSON.stringify({ path: filePath })
+  }),
+  renameFile: (projectId, oldPath, newPath) => request(`/api/files/${projectId}/rename`, {
+    method: 'POST', body: JSON.stringify({ oldPath, newPath })
+  }),
+  downloadZip: (projectId) => `/api/files/${projectId}/download`,
+
+  // Templates
+  getTemplates: () => request('/api/templates'),
+
+  // System
+  getSystemInfo: () => request('/api/system/info'),
 };
 
-// SSE AI streaming
-export function streamAI({ projectId, messages, model, imageBase64, onChunk, onFile, onThinking, onAction, onDone, onError }) {
-  const controller = new AbortController();
+// ── Streaming AI ──────────────────────────────────────────────────
+export function streamAI({ projectId, messages, model, imageBase64, onChunk, onFile, onDone, onError, signal }) {
+  let buffer = '';
+  let fullText = '';
+  const filesChanged = [];
 
-  fetch(`${BASE}/ai/chat/${projectId}`, {
+  fetch(`/api/ai/chat/${projectId}`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ messages, model, imageBase64 }),
-    signal: controller.signal
-  }).then(async (res) => {
-    if (!res.ok) throw new Error('AI request failed');
+    signal,
+  }).then(async res => {
+    if (!res.ok) throw new Error(`Server error: ${res.status}`);
     const reader = res.body.getReader();
-    const dec = new TextDecoder();
-    let buf = '';
+    const decoder = new TextDecoder();
+
     while (true) {
       const { done, value } = await reader.read();
       if (done) break;
-      buf += dec.decode(value, { stream: true });
-      const lines = buf.split('\n');
-      buf = lines.pop();
+      buffer += decoder.decode(value, { stream: true });
+      const lines = buffer.split('\n');
+      buffer = lines.pop() || '';
+
       for (const line of lines) {
         if (!line.startsWith('data: ')) continue;
         try {
           const { event, data } = JSON.parse(line.slice(6));
-          if (event === 'ai-chunk') onChunk?.(data.chunk, data.full);
-          if (event === 'ai-thinking') onThinking?.(data.thinking);
-          if (event === 'file-changed') onFile?.(data);
-          if (event === 'ai-action') onAction?.(data);
-          if (event === 'ai-done' || event === 'complete') onDone?.(data);
-          if (event === 'ai-error' || event === 'error') onError?.(data);
+          if (event === 'chunk') {
+            fullText += data.content || '';
+            onChunk?.(data.content || '', fullText);
+          }
+          if (event === 'file') {
+            filesChanged.push(data.path);
+            onFile?.(data);
+          }
+          if (event === 'thinking') {
+            // ThinkingPanel receives this via store
+          }
+          if (event === 'complete') {
+            onDone?.({ ...data, filesChanged });
+          }
+          if (event === 'error') {
+            onError?.(new Error(data.message));
+          }
         } catch {}
       }
     }
   }).catch(err => {
-    if (err.name !== 'AbortError') onError?.({ message: err.message });
+    if (err.name !== 'AbortError') onError?.(err);
   });
-
-  return () => controller.abort();
 }

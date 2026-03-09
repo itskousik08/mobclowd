@@ -2,18 +2,18 @@ import React, { useEffect, useState, useCallback, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAppStore } from '../store/useAppStore';
 import { api } from '../utils/api';
-import { useSocket } from '../hooks/useSocket.js';
 import toast from 'react-hot-toast';
 import WorkspaceHeader from '../components/Workspace/WorkspaceHeader.jsx';
 import FileExplorer from '../components/FileExplorer/FileExplorer.jsx';
 import EditorPanel from '../components/Editor/EditorPanel.jsx';
 import ChatPanel from '../components/Chat/ChatPanel.jsx';
 import PreviewPanel from '../components/Preview/PreviewPanel.jsx';
+import ToolsSidebar from '../components/Workspace/ToolsSidebar.jsx';
 
 export default function WorkspacePage() {
   const { projectId } = useParams();
   const navigate = useNavigate();
-  const { setCurrentProject, setFileTree, openFile, updateFileContent, setPreviewUrl, mobilePanel, setMobilePanel } = useAppStore();
+  const { setCurrentProject, setFileTree, openFile, updateFileContent, setPreviewUrl, mobilePanel, setMobilePanel, addNotification, personality, userName } = useAppStore();
   const [loading, setLoading] = useState(true);
   const [explorerWidth, setExplorerWidth] = useState(220);
   const [chatWidth, setChatWidth] = useState(360);
@@ -35,15 +35,6 @@ export default function WorkspacePage() {
     if (tree) setFileTree(tree);
   }, [projectId]);
 
-  useSocket(projectId, {
-    onFileChanged: async ({ path, content }) => {
-      updateFileContent(path, content);
-      await refreshTree();
-      setPreviewUrl('');
-      setTimeout(() => setPreviewUrl(`/preview/${projectId}/index.html?t=${Date.now()}`), 150);
-    }
-  });
-
   const openFileHandler = useCallback(async (filePath) => {
     try {
       const { content, mimeType } = await api.readFile(projectId, filePath);
@@ -51,6 +42,19 @@ export default function WorkspacePage() {
       setMobilePanel('editor');
     } catch { toast.error('Failed to open file'); }
   }, [projectId]);
+
+  // Keyboard shortcut: Cmd+K focuses chat
+  useEffect(() => {
+    function handleKeyDown(e) {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+        e.preventDefault();
+        setMobilePanel('chat');
+        document.querySelector('[data-chat-input]')?.focus();
+      }
+    }
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
 
   // Resize logic
   function startResize(side) {
@@ -76,9 +80,6 @@ export default function WorkspacePage() {
     </div>
   );
 
-  // Mobile layout
-  const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
-
   return (
     <div className="h-screen flex flex-col overflow-hidden" style={{ background: 'var(--bg)' }}>
       <WorkspaceHeader projectId={projectId} onRefreshTree={refreshTree} />
@@ -97,7 +98,7 @@ export default function WorkspacePage() {
         </div>
 
         {/* Preview */}
-        <div className="hidden lg:flex flex-col flex-shrink-0" style={{ width: '38%', minWidth: 280 }}>
+        <div className="hidden lg:flex flex-col flex-shrink-0" style={{ width: '35%', minWidth: 260 }}>
           <PreviewPanel projectId={projectId} />
         </div>
 
@@ -105,6 +106,11 @@ export default function WorkspacePage() {
         <div className="hidden md:flex flex-col flex-shrink-0" style={{ width: chatWidth }}>
           <div className="resize-h" onMouseDown={startResize('chat')} style={{ width: 3 }} />
           <ChatPanel projectId={projectId} onRefreshTree={refreshTree} />
+        </div>
+
+        {/* v4: Tools sidebar */}
+        <div className="hidden md:flex">
+          <ToolsSidebar projectId={projectId} />
         </div>
       </div>
 

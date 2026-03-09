@@ -36,6 +36,12 @@ app.use('/api/files', require('./routes/files'));
 app.use('/api/ai', require('./routes/ai'));
 app.use('/api/templates', require('./routes/templates'));
 app.use('/api/system', require('./routes/system'));
+// v4 Enhanced Routes
+app.use('/api/git', require('./routes/git'));
+app.use('/api/database', require('./routes/database'));
+app.use('/api/security', require('./routes/security'));
+app.use('/api/cicd', require('./routes/cicd'));
+app.use('/api/analytics', require('./routes/analytics'));
 
 // Serve workspace files statically for preview
 app.use('/preview', express.static(WORKSPACE_DIR));

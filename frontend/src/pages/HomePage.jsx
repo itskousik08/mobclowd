@@ -1,15 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Plus, Folder, Trash2, ChevronRight, Clock, Sun, Moon, Cpu, Wifi, WifiOff, Zap, Code2, Globe, Layers, ArrowRight, Star } from 'lucide-react';
+import { Plus, Folder, Trash2, ChevronRight, Clock, Sun, Moon, Cpu, Wifi, WifiOff, Zap, Code2, Globe, Layers, ArrowRight, Star, Settings, GitBranch, Shield, Database, BarChart2 } from "lucide-react";
 import { useAppStore } from '../store/useAppStore';
 import { api } from '../utils/api';
 import toast from 'react-hot-toast';
 import NewProjectModal from '../components/Modals/NewProjectModal.jsx';
+import SettingsModal from '../components/Modals/SettingsModal.jsx';
 
 export default function HomePage() {
   const navigate = useNavigate();
-  const { projects, setProjects, removeProject, ollamaStatus, models, selectedModel, setSelectedModel, theme, toggleTheme } = useAppStore();
+  const { projects, setProjects, removeProject, ollamaStatus, models, selectedModel, setSelectedModel, theme, toggleTheme, personality, userName, userCity } = useAppStore();
+  const [showSettings, setShowSettings] = useState(false);
   const [loading, setLoading] = useState(true);
   const [showNew, setShowNew] = useState(false);
   const [search, setSearch] = useState('');
@@ -70,6 +72,11 @@ export default function HomePage() {
             {models.map(m => <option key={m.name} value={m.name}>{m.name}</option>)}
           </select>
         )}
+
+        {/* Theme toggle */}
+        <button onClick={() => setShowSettings(true)} className="btn-icon tooltip" data-tip="Settings">
+          <Settings size={16} />
+        </button>
 
         {/* Theme toggle */}
         <button onClick={toggleTheme} className="btn-icon tooltip" data-tip={theme === 'dark' ? 'Light mode' : 'Dark mode'}>
@@ -201,6 +208,7 @@ export default function HomePage() {
         </div>
       )}
 
+      <SettingsModal open={showSettings} onClose={() => setShowSettings(false)} />
       <NewProjectModal open={showNew} onClose={() => setShowNew(false)}
         onCreated={(p) => navigate(`/workspace/${p.id}`)} />
     </div>

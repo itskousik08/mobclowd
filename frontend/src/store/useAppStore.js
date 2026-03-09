@@ -4,16 +4,19 @@ import { persist } from 'zustand/middleware';
 export const useAppStore = create(
   persist(
     (set, get) => ({
-      // Theme
+      // ── Theme ──────────────────────
       theme: 'dark',
-      toggleTheme: () => {
-        const next = get().theme === 'dark' ? 'light' : 'dark';
-        set({ theme: next });
-        if (next === 'light') document.documentElement.classList.add('light-mode');
-        else document.documentElement.classList.remove('light-mode');
-      },
+      toggleTheme: () => set(s => ({ theme: s.theme === 'dark' ? 'light' : 'dark' })),
 
-      // Ollama
+      // ── Personality ─────────────────
+      personality: 'professional', // 'professional' | 'lovable' | 'expert'
+      userName: '',
+      userCity: '',
+      setPersonality: (personality) => set({ personality }),
+      setUserName: (userName) => set({ userName }),
+      setUserCity: (userCity) => set({ userCity }),
+
+      // ── Ollama ──────────────────────
       ollamaStatus: 'unknown',
       models: [],
       selectedModel: '',
@@ -21,7 +24,7 @@ export const useAppStore = create(
       setModels: (m) => set({ models: m }),
       setSelectedModel: (m) => set({ selectedModel: m }),
 
-      // Projects
+      // ── Projects ────────────────────
       projects: [],
       currentProject: null,
       setProjects: (p) => set({ projects: p }),
@@ -29,93 +32,100 @@ export const useAppStore = create(
       addProject: (p) => set(s => ({ projects: [p, ...s.projects] })),
       removeProject: (id) => set(s => ({ projects: s.projects.filter(p => p.id !== id) })),
 
-      // Files
+      // ── File Explorer ───────────────
       fileTree: [],
-      setFileTree: (t) => set({ fileTree: t }),
+      setFileTree: (tree) => set({ fileTree: tree }),
+
+      // ── Editor ──────────────────────
       openFiles: [],
       activeFile: null,
-      openFile: (file) => {
-        const { openFiles } = get();
-        const exists = openFiles.find(f => f.path === file.path);
-        if (!exists) set({ openFiles: [...openFiles, file], activeFile: file });
-        else set({ activeFile: exists });
-      },
-      closeFile: (path) => {
-        const { openFiles, activeFile } = get();
-        const filtered = openFiles.filter(f => f.path !== path);
-        const newActive = activeFile?.path === path ? (filtered[filtered.length - 1] || null) : activeFile;
-        set({ openFiles: filtered, activeFile: newActive });
-      },
-      setActiveFile: (f) => set({ activeFile: f }),
-      updateFileContent: (path, content) => {
-        const { openFiles, activeFile } = get();
-        const updated = openFiles.map(f => f.path === path ? { ...f, content, modified: true } : f);
-        set({ openFiles: updated });
-        if (activeFile?.path === path) set({ activeFile: { ...activeFile, content, modified: true } });
-      },
-      markFileSaved: (path) => {
-        const { openFiles, activeFile } = get();
-        const updated = openFiles.map(f => f.path === path ? { ...f, modified: false } : f);
-        set({ openFiles: updated });
-        if (activeFile?.path === path) set({ activeFile: { ...activeFile, modified: false } });
-      },
-
-      // Chat
-      messages: [],
-      isAiThinking: false,
-      aiThinkingSteps: [],
-      addMessage: (m) => set(s => ({ messages: [...s.messages, { ...m, id: m.id || Date.now() }] })),
-      updateLastMessage: (upd) => set(s => {
-        if (!s.messages.length) return s;
-        const msgs = [...s.messages];
-        msgs[msgs.length - 1] = { ...msgs[msgs.length - 1], ...upd };
-        return { messages: msgs };
+      openFile: (file) => set(s => {
+        const exists = s.openFiles.find(f => f.path === file.path);
+        if (exists) return { activeFile: exists };
+        const updated = [...s.openFiles, file];
+        return { openFiles: updated, activeFile: file };
       }),
-      clearChat: () => set({ messages: [], aiThinkingSteps: [] }),
-      setIsAiThinking: (v) => set({ isAiThinking: v }),
-      setAiThinkingSteps: (s) => set({ aiThinkingSteps: s }),
-      addThinkingStep: (s) => set(st => ({ aiThinkingSteps: [...st.aiThinkingSteps, s] })),
-
-      // Preview
-      previewUrl: '',
-      previewMode: 'desktop',
-      setPreviewUrl: (u) => set({ previewUrl: u }),
-      setPreviewMode: (m) => set({ previewMode: m }),
-
-      // Layout panels
-      showExplorer: true,
-      showChat: true,
-      showPreview: true,
-      togglePanel: (p) => set(s => ({ [p]: !s[p] })),
-
-      // Mobile active panel
-      mobilePanel: 'chat', // 'chat' | 'editor' | 'preview' | 'files'
-      setMobilePanel: (p) => set({ mobilePanel: p }),
-
-      // Prompt history
-      promptHistory: [],
-      addToHistory: (txt) => set(s => ({
-        promptHistory: [{ text: txt, ts: Date.now() }, ...s.promptHistory].slice(0, 50)
+      closeFile: (path) => set(s => {
+        const updated = s.openFiles.filter(f => f.path !== path);
+        const wasActive = s.activeFile?.path === path;
+        return {
+          openFiles: updated,
+          activeFile: wasActive ? (updated[updated.length - 1] || null) : s.activeFile
+        };
+      }),
+      setActiveFile: (file) => set({ activeFile: file }),
+      updateFileContent: (path, content) => set(s => ({
+        openFiles: s.openFiles.map(f => f.path === path ? { ...f, content, dirty: true } : f),
+        activeFile: s.activeFile?.path === path ? { ...s.activeFile, content, dirty: true } : s.activeFile
+      })),
+      markFileSaved: (path) => set(s => ({
+        openFiles: s.openFiles.map(f => f.path === path ? { ...f, dirty: false } : f),
+        activeFile: s.activeFile?.path === path ? { ...s.activeFile, dirty: false } : s.activeFile
       })),
 
-      // AI actions log
-      aiActions: [],
-      addAiAction: (a) => set(s => ({ aiActions: [{ ...a, ts: Date.now() }, ...s.aiActions].slice(0, 30) })),
-      clearAiActions: () => set({ aiActions: [] }),
+      // ── Preview ─────────────────────
+      previewUrl: '',
+      setPreviewUrl: (url) => set({ previewUrl: url }),
 
-      // Suggestions
-      suggestions: [],
-      setSuggestions: (s) => set({ suggestions: s }),
+      // ── Chat / AI ───────────────────
+      chatMessages: {},
+      isAiThinking: false,
+      aiThinkingSteps: [],
+      aiActions: [],
+      addMessage: (msg) => set(s => {
+        const projectId = s.currentProject?.id || 'global';
+        const msgs = s.chatMessages[projectId] || [];
+        return { chatMessages: { ...s.chatMessages, [projectId]: [...msgs, { ...msg, id: Date.now() }] } };
+      }),
+      updateLastMessage: (updates) => set(s => {
+        const projectId = s.currentProject?.id || 'global';
+        const msgs = [...(s.chatMessages[projectId] || [])];
+        if (!msgs.length) return {};
+        msgs[msgs.length - 1] = { ...msgs[msgs.length - 1], ...updates };
+        return { chatMessages: { ...s.chatMessages, [projectId]: msgs } };
+      }),
+      clearMessages: (projectId) => set(s => ({
+        chatMessages: { ...s.chatMessages, [projectId]: [] }
+      })),
+      setIsAiThinking: (v) => set({ isAiThinking: v }),
+      setAiThinkingSteps: (steps) => set({ aiThinkingSteps: steps }),
+      addAiAction: (action) => set(s => ({ aiActions: [...s.aiActions.slice(-50), action] })),
+
+      // ── Panels (desktop) ───────────────
+      showExplorer: true,
+      showPreview: true,
+      showChat: true,
+      togglePanel: (panel) => set(s => ({ [`show${panel}`]: !s[`show${panel}`] })),
+
+      // ── Mobile panel ──────────────────
+      mobilePanel: 'chat',
+      setMobilePanel: (p) => set({ mobilePanel: p }),
+
+      // ── Notifications ─────────────────
+      notifications: [],
+      addNotification: (n) => set(s => ({ 
+        notifications: [{ ...n, id: Date.now(), read: false, time: new Date().toISOString() }, ...s.notifications.slice(0, 49)]
+      })),
+      markAllRead: () => set(s => ({ notifications: s.notifications.map(n => ({ ...n, read: true })) })),
+      clearNotifications: () => set({ notifications: [] }),
+
+      // ── Keyboard shortcuts preference ──
+      cmdKEnabled: true,
+
+      // ── Welcome seen ──────────────────
+      welcomeSeen: false,
+      setWelcomeSeen: () => set({ welcomeSeen: true }),
     }),
     {
-      name: 'mobclowd-v2',
+      name: 'mobcloud-v4-store',
       partialize: (s) => ({
         theme: s.theme,
+        personality: s.personality,
+        userName: s.userName,
+        userCity: s.userCity,
         selectedModel: s.selectedModel,
-        promptHistory: s.promptHistory,
-        showExplorer: s.showExplorer,
-        showChat: s.showChat,
-        showPreview: s.showPreview,
+        welcomeSeen: s.welcomeSeen,
+        cmdKEnabled: s.cmdKEnabled,
       })
     }
   )

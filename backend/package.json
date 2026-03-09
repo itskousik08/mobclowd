@@ -1,7 +1,7 @@
 {
   "name": "mobclowd-backend",
-  "version": "1.0.0",
-  "description": "Mobclowd Backend API Server",
+  "version": "4.0.0",
+  "description": "MobCloud v4 Backend — Local AI Development Platform",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
@@ -24,6 +24,9 @@
     "node-fetch": "^3.3.2",
     "mime-types": "^2.1.35",
     "diff": "^5.1.0"
+  },
+  "optionalDependencies": {
+    "better-sqlite3": "^9.4.3"
   },
   "devDependencies": {
     "nodemon": "^3.0.2"
